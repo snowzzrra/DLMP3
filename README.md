@@ -1,44 +1,41 @@
 # DLMP3 Bot (Discord.JS Local MP3)
-A Discord bot that plays local mp3 audio tracks. Written in Discord.JS.
+Um bot do discord que toca musicas MP3 locais. Escrito em JavaScript e criado originalmente por Andrew Lee.
 
-[Video Tutorial](https://www.youtube.com/watch?v=7X3FAhYW31I)
-
-(Originally for Alee's birthday)
-
-If there's anything wrong, feel free to make a fork and put a pull request.
-
-# Configuration
-Make a new file called `config.json`.
+# Configuração
+Crie um novo arquivo chamado `config.json`.
 ```
 {
-    "token": "token_here",
+    "token": "token_aqui",
     "prefix": "dl:",
-    "botOwner": "your_user_id_here",
-    "statusChannel": "channel_id",
-    "voiceChannel": "voice_channel_id"
+    "botOwner": "seu_id_aqui",
+    "statusChannel": "id_do_chat",
+    "voiceChannel": "id_da_call"
 }
 ```
 
-Add your own audio files using the mp3 file extension to the `music` folder.
+Adicione seus próprios arquivos com a extensão .mp3 na pasta `music`.
 
-Launch the bot using `node bot.js` in terminal.
+Inicialize o bot usando `node bot.js` no terminal.
 
-# Help Command
+# Comando Help
 ```
-Public Only
+Comandos públicos
 -----------
-help - Displays commands.
+help - Mostra os comandos.
 ping - Pong!
-git - Links to the source repo.
-playing - Tells you what it's playing at the moment.
-about - About the bot.
+git - Link do repositório.
+playing - Diz o que está tocando no momento.
+about - Sobre o bot.
 
-Bot Owner Only
+Somente o Dono
 --------------
-join - Joins voice chat.
-resume - Resumes music.
-pause - Pauses music.
-skip - Skips the audio track.
-leave - Leaves voice chat.
-stop - Stops bot.
+join - Entra na call.
+resume - Despausa a música.
+pause - Pausa a música.
+skip - Pula a música.
+leave - Sai do canal.
+stop - Para o bot.
+play-x - Toca uma música específica (onde x é o número da música).
 ```
+# Bugs conhecidos
+-- Quando há somente uma música na pasta, muitas vezes o bot não inicializa corretamente (por tentar dar play na segunda musica).
