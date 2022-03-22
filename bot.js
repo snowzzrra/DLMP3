@@ -1,3 +1,4 @@
+
 /**************************************************************************
  * 
  *  DLMP3 Bot: A Discord bot that plays local mp3 audio tracks.
@@ -18,6 +19,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  ***************************************************************************/
+
 const Discord = require('discord.js');
 const fs = require('fs');
 const bot = new Discord.Client();
@@ -26,20 +28,20 @@ let dispatcher;
 let audio;
 let voiceChannel;
 let fileData;
+var files = fs.readdirSync('./music');
 
-bot.login(config.token);
+bot.login(config.token); 
 
-function playAudio() {
+function playAudio(music) {
   voiceChannel = bot.channels.cache.get(config.voiceChannel);
   if (!voiceChannel) return console.error('The voice channel does not exist!\n(Have you looked at your configuration?)');
   
   voiceChannel.join().then(connection => {
-    let files = fs.readdirSync('./music');
 
     while (true) {
-      audio = files[Math.floor(Math.random() * files.length)];
-      console.log('Searching .mp3 file...');
-      if (audio.endsWith('.mp3')) {
+	  audio = files[parseInt(music[1])]
+	  console.log('Procurando arquivos...');
+	  if (audio.endsWith('.mp3')) {
         break;
       }
     }
@@ -47,26 +49,26 @@ function playAudio() {
     dispatcher = connection.play('./music/' + audio);
     
     dispatcher.on('start', () => {
-      console.log('Now playing ' + audio);
+      console.log('Tocando: ' + audio);
       fileData = "Now Playing: " + audio;
       fs.writeFile("now-playing.txt", fileData, (err) => { 
       if (err) 
       console.log(err); 
       }); 
       const statusEmbed = new Discord.MessageEmbed()
-      .addField('Now Playing', `${audio}`)
+      .addField('Tocando: ', `${audio}`)
       .setColor('#0066ff')
 
       let statusChannel = bot.channels.cache.get(config.statusChannel);
-      if (!statusChannel) return console.error('The status channel does not exist! Skipping.');
+      if (!statusChannel) return console.error('Esse canal de texto não existe! Pulando.');
       statusChannel.send(statusEmbed);
     });
     
     dispatcher.on('error', console.error);
 
     dispatcher.on('finish', () => {
-      console.log('Music has finished playing.');
-      playAudio();
+      console.log('A musica acabou.');
+	  playAudio(music)
     });
     
   }).catch(e => {
@@ -76,30 +78,33 @@ function playAudio() {
 }
 
 bot.on('ready', () => {
-  console.log('Bot is ready!');
-  console.log(`Logged in as ${bot.user.tag}!`);
-  console.log(`Prefix: ${config.prefix}`);
-  console.log(`Owner ID: ${config.botOwner}`);
-  console.log(`Voice Channel: ${config.voiceChannel}`);
-  console.log(`Status Channel: ${config.statusChannel}\n`);
+  console.log('\x1b[34m%s\x1b[0m', 'Bot pronto!');
+  console.log(`Logado como ${bot.user.tag}!`);
+  console.log(`Prefixo: ${config.prefix}`);
+  console.log(`ID dono: ${config.botOwner}`);
+  console.log(`Canal de voz: ${config.voiceChannel}`);
+  console.log(`Canal de texto: ${config.statusChannel}\n`);
+  for (i = 0; i < files.length; i++){
+	  console.log('\x1b[36m%s\x1b[0m', `${files[i]} - ${i}`)
+  }
+  console.log(' ')
 
   bot.user.setPresence({
     activity: {
-      name: `Music | ${config.prefix}help`
+      name: `Musicas | ${config.prefix}help`
     },
     status: 'online',
-  }).then(presence => console.log(`Activity set to "${presence.activities[0].name}"`)).catch(console.error);
+  }).then(presence => console.log(`Atividade settada como "${presence.activities[0].name}"`)).catch(console.error);
 
   const readyEmbed = new Discord.MessageEmbed()
   .setAuthor(`${bot.user.username}`, bot.user.avatarURL())
-  .setDescription('Starting bot...')
+  .setDescription('Bot iniciado.')
   .setColor('#0066ff')
 
   let statusChannel = bot.channels.cache.get(config.statusChannel);
   if (!statusChannel) return console.error('The status channel does not exist! Skipping.');
   statusChannel.send(readyEmbed);
-  console.log('Connected to the voice channel.');
-  playAudio();
+  console.log('\x1b[32m%s\x1b[0m', 'Conectado.');
 });
 
 bot.on('message', async msg => {
@@ -118,7 +123,7 @@ bot.on('message', async msg => {
     .setDescription(`Currently playing \`${audio}\`.`)
     .addField('Public Commands', `${config.prefix}help\n${config.prefix}ping\n${config.prefix}git\n${config.prefix}playing\n${config.prefix}about\n`, true)
     .addField('Bot Owner Only', `${config.prefix}join\n${config.prefix}resume\n${config.prefix}pause\n${config.prefix}skip\n${config.prefix}leave\n${config.prefix}stop\n`, true)
-    .setFooter('© Copyright 2020 Andrew Lee. Licensed with GPL-3.0.')
+    .setFooter('© FODASE Inc.')
     .setColor('#0066ff')
 
     msg.channel.send(helpEmbed);
@@ -129,15 +134,15 @@ bot.on('message', async msg => {
   }
 
   if (command == 'git') {
-    msg.reply('This is the source code of this project.\nhttps://github.com/Alee14/DLMP3');
+    msg.reply('This is the source code of this project.\nhttps://github.com/snowzzrra/DLMP3');
   }
 
   if (command == 'playing') {
-    msg.channel.send('Currently playing `' + audio + '`.');
+    msg.channel.send('Tocando `' + audio + '`.');
   }
-  
+
   if (command == 'about') {
-    msg.channel.send('The bot code was created by Andrew Lee (Alee#4277). Written in Discord.JS and licensed with GPL-3.0.');
+    msg.channel.send('The bot code was created by Andrew Lee (Alee#4277) and forked by Guilherme Snow (snow#1991). Written in Discord.JS and licensed with GPL-3.0.');
   }
 
   if (![config.botOwner].includes(msg.author.id)) return;
@@ -146,60 +151,66 @@ bot.on('message', async msg => {
 
   if (command == 'join') {
     msg.reply('Joining voice channel.');
-    console.log('Connected to the voice channel.');
+    console.log('\x1b[32m%s\x1b[0m', 'Conectado.');
     playAudio();
   }
 
   if (command == 'resume') {
-    msg.reply('Resuming music.');
+    msg.reply('Tocando de novo.');
     dispatcher.resume();
   }
 
   if (command == 'pause') {
-    msg.reply('Pausing music.');
+    msg.reply('Pausando...');
     dispatcher.pause();
   }
 
   if (command == 'skip') {
-    msg.reply('Skipping `' + audio + '`...');
+    msg.reply('Pulando `' + audio + '`...');
     dispatcher.pause();
     dispatcher = null;
-    playAudio();
+	music[1] = parseInt(music[1])+1;
+    playAudio(music);
   }
 
   if (command == 'leave') {
     voiceChannel = bot.channels.cache.get(config.voiceChannel);
-    if (!voiceChannel) return console.error('The voice channel does not exist!\n(Have you looked at your configuration?)');
-    msg.reply('Leaving voice channel.');
+    if (!voiceChannel) return console.error('Esse canal de voz não existe!\n(Você já viu as configurações?)');
+    msg.reply('Vazando.');
     console.log('Leaving voice channel.');
-    fileData = "Now Playing: Nothing";
+    fileData = "Agora tocando: Nada";
     fs.writeFile("now-playing.txt", fileData, (err) => { 
     if (err) 
     console.log(err); 
     }); 
-    audio = "Not Playing";
+    audio = "Não tocando";
     dispatcher.destroy();
     voiceChannel.leave();
   }
 
   if (command == 'stop') {
-    await msg.reply('Powering off...');
-    fileData = "Now Playing: Nothing";
+    await msg.reply('Desligando...');
+    fileData = "Agora tocando: Nada";
     await fs.writeFile("now-playing.txt", fileData, (err) => { 
     if (err) 
     console.log(err); 
     }); 
     const statusEmbed = new Discord.MessageEmbed()
     .setAuthor(`${bot.user.username}`, bot.user.avatarURL())
-    .setDescription(`That\'s all folks! Powering down ${bot.user.username}...`)
+    .setDescription(`É isso! Desligando o ${bot.user.username}...`)
     .setColor('#0066ff')
     let statusChannel = bot.channels.cache.get(config.statusChannel);
-    if (!statusChannel) return console.error('The status channel does not exist! Skipping.');
+    if (!statusChannel) return console.error('O canal de status não existe! Pulando.');
     await statusChannel.send(statusEmbed);
-    console.log('Powering off...');
+    console.log('\x1b[31m%s\x1b[0m', 'Desligando...');
     dispatcher.destroy();
     bot.destroy();
     process.exit(0);
+  }
+  
+  if (command.startsWith('play')) {
+	  music = command.split('-');
+	  playAudio(music);
   }
 
 });
